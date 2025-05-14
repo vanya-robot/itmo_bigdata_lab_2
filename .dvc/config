@@ -1,0 +1,5 @@
+[core]
+    remote = lab1
+['remote "lab1"']
+    url = gdrive://162Q9GTyIheR3Zo17U44l36nQa2neiWpJ
+    gdrive_use_service_account = true
