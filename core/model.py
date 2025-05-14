@@ -1,59 +1,46 @@
 import joblib
-import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
+from .data_processing import DataProcessor
+from .exceptions import ModelTrainingError
 
-class PenguinModel:
-    """Класс для работы с моделью классификации пингвинов"""
-    
-    def __init__(self):
-        self.model = RandomForestClassifier(n_estimators=100, random_state=42)
-        self.scaler = StandardScaler()
-        
-        self._island_map = {'Torgersen': 0, 'Biscoe': 1, 'Dream': 2}
-        self._sex_map = {'MALE': 0, 'FEMALE': 1}
-        self._species_map = {'Adelie': 0, 'Gentoo': 1, 'Chinstrap': 2}
-        self._inv_species_map = {v: k for k, v in self._species_map.items()}
+class PenguinClassifier:
+    def __init__(self, config_path='configs/config.ini'):
+        self.model = RandomForestClassifier()
+        self.data_processor = DataProcessor(config_path)
+        self.is_trained = False
 
-    def preprocess(self, data: pd.DataFrame) -> tuple:
-        """Подготовка данных"""
-        df = data.dropna().copy()
-        df['island'] = df['island'].map(self._island_map)
-        df['sex'] = df['sex'].map(self._sex_map)
-        y = df['species'].map(self._species_map)
-        
-        features = ['island', 'culmen_length_mm', 'culmen_depth_mm', 
-                   'flipper_length_mm', 'body_mass_g', 'sex']
-        X = df[features]
-        
-        return X, y
+    def train(self, data_path):
+        try:
+            X_train, X_test, y_train, y_test = self.data_processor.process(data_path)
+            self.model.fit(X_train, y_train)
+            
+            y_pred = self.model.predict(X_test)
+            self.accuracy = accuracy_score(y_test, y_pred)
+            self.is_trained = True
+            
+            return self.accuracy
+        except Exception as e:
+            raise ModelTrainingError(f"Training failed: {str(e)}")
 
-    def train(self, data_path: str):
-        """Обучение модели"""
-        df = pd.read_csv(data_path)
-        X, y = self.preprocess(df)
-        X_scaled = self.scaler.fit_transform(X)
-        self.model.fit(X_scaled, y)
+    def predict(self, features):
+        if not self.is_trained:
+            raise ValueError("Model is not trained yet")
+        return self.model.predict(features)
 
-    def predict(self, features: dict) -> str:
-        """Предсказание вида пингвина"""
-        df = pd.DataFrame([features])
-        df['island'] = df['island'].map(self._island_map)
-        df['sex'] = df['sex'].map(self._sex_map)
-        
-        X = self.scaler.transform(df)
-        pred = self.model.predict(X)[0]
-        return self._inv_species_map[pred]
-
-    def save(self, path: str):
-        """Сохранение модели"""
-        joblib.dump({'model': self.model, 'scaler': self.scaler}, path)
+    def save(self, path):
+        joblib.dump({
+            'model': self.model,
+            'accuracy': self.accuracy,
+            'data_processor': self.data_processor
+        }, path)
 
     @classmethod
-    def load(cls, path: str) -> 'PenguinModel':
-        """Загрузка модели"""
+    def load(cls, path):
+        loaded = joblib.load(path)
         instance = cls()
-        data = joblib.load(path)
-        instance.model = data['model']
-        instance.scaler = data['scaler']
+        instance.model = loaded['model']
+        instance.accuracy = loaded['accuracy']
+        instance.data_processor = loaded['data_processor']
+        instance.is_trained = True
         return instance
