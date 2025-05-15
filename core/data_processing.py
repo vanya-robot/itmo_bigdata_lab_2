@@ -6,12 +6,16 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from configparser import ConfigParser
 from typing import Dict, Any
+from pathlib import Path
+
+LOG_DIR = Path("logs/")
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('training.log'),
+        logging.FileHandler('logs/processing.log'),
         logging.StreamHandler()
     ]
 )
@@ -69,3 +73,16 @@ class DataProcessor:
         return train_test_split(X_processed, y, 
                               test_size=self.config['test_size'],
                               random_state=self.config['random_state'])
+    
+    def transform_single(self, features: dict) -> np.array:
+        """Преобразует единичный образец для предсказания"""
+        try:
+
+            df = pd.DataFrame([features])
+            
+            processed = self.preprocessor.transform(df)
+            return processed
+            
+        except Exception as e:
+            logging.error(f"Transform failed: {str(e)}")
+            raise ValueError(f"Feature transformation error: {str(e)}")

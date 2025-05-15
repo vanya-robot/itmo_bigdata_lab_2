@@ -6,6 +6,7 @@ from .schemas import PenguinFeatures
 from pathlib import Path
 import logging
 import time
+import pandas as pd
 
 LOG_DIR = Path("logs/")
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -49,7 +50,8 @@ async def predict(features: PenguinFeatures):
     try:
         logger.info(f"Prediction request: {features.dict()}")
 
-        processed = model.data_processor.transform_single(features.dict())
+        df = pd.DataFrame([features.dict()])
+        processed = model.data_processor.preprocessor.transform(df)
         logger.debug("Data processed successfully")
 
         prediction = model.predict(processed)
