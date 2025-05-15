@@ -3,7 +3,8 @@ import zipfile
 import os
 from pathlib import Path
 from core.model import PenguinClassifier
-from core.config import load_config
+from core.config import load_config_to_dict
+from core.exceptions import ModelSaveError, ModelTrainingError
 
 logging.basicConfig(
     level=logging.INFO,
@@ -44,14 +45,17 @@ def main():
         logger.info("Starting training process...")
         
         data_path = ensure_data_ready()
+        config = load_config_to_dict('configs/config.ini')
 
-        model = PenguinClassifier(load_config())
+        model = PenguinClassifier(config)
         accuracy = model.train(data_path)
-        model.save('models/penguin_model.pkl')
+        try:
+            model.save('models/penguin_model.pkl')
+            logger.info(f"Training completed successfully! Accuracy: {accuracy:.2f}")
+        except ModelSaveError as e:
+            logger.critical(f"Saving failed: {str(e)}")
         
-        logger.info(f"Training completed successfully! Accuracy: {accuracy:.2f}")
-        
-    except Exception as e:
+    except ModelTrainingError as e:
         logger.critical(f"Training pipeline failed: {str(e)}")
         raise
 

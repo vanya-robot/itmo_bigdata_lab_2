@@ -9,3 +9,7 @@ class DataProcessingError(Exception):
 class PredictionError(Exception):
     """Ошибка при предсказании"""
     pass
+
+class ModelSaveError(Exception):
+    """Ошибка при сохранении модели"""
+    pass
