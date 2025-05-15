@@ -1,6 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
 from api.app import app
+import logging
+
+logger = logging.getLogger(__name__)
 
 client = TestClient(app)
 
@@ -23,5 +26,7 @@ client = TestClient(app)
     }, 422)
 ])
 def test_predict_endpoint(test_input, expected):
+    logger.info(f"Testing with input: {test_input}")
     response = client.post("/predict", json=test_input)
+    logger.debug(f"Response status: {response.status_code}, content: {response.json()}")
     assert response.status_code == expected
