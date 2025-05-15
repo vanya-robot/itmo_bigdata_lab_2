@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from api.app import app
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("api test logger")
 
 client = TestClient(app)
 

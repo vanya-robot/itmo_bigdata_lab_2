@@ -1,3 +1,7 @@
 /penguin_dataset.zip
 /gdrive-key.json
 /.venv
+/data
+/core/__pycache__
+penguin_classifier.egg-info
+logs/

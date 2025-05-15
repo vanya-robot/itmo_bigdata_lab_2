@@ -3,7 +3,7 @@ import logging
 from core.model import PenguinClassifier
 from core.exceptions import ModelTrainingError
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("model test logger")
 
 @pytest.fixture
 def model():

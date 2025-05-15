@@ -3,7 +3,7 @@ import logging
 from core.data_processing import DataProcessor
 from core.exceptions import DataProcessingError
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("data test logger")
 
 @pytest.fixture
 def processor():

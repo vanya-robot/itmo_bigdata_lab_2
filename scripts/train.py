@@ -5,16 +5,21 @@ from pathlib import Path
 from core.model import PenguinClassifier
 from core.config import load_config_to_dict
 from core.exceptions import ModelSaveError, ModelTrainingError
+from pathlib import Path
+
+LOG_DIR = Path("logs/")
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('training.log'),
+        logging.FileHandler('logs/training.log'),
         logging.StreamHandler()
     ]
 )
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("train logger")
 
 def ensure_data_ready(zip_path: str = 'penguin_dataset.zip') -> str:
     csv_path = 'data/raw/penguins_size.csv'
