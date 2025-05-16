@@ -2,16 +2,21 @@ import pytest
 import logging
 from core.model import PenguinClassifier
 from core.exceptions import ModelTrainingError
+from core.data_processing import DataProcessor
 
 logger = logging.getLogger("model test logger")
 
 @pytest.fixture
 def model():
-    return PenguinClassifier('configs/config.ini')
+    return PenguinClassifier.load('models/penguin_model.pkl')
+
+@pytest.fixture
+def processor():
+    return DataProcessor()
 
 def test_model_training(model):
     """Тестирование обучения модели с логированием"""
-    test_data_path = 'data/raw/penguins.csv'
+    test_data_path = 'data/raw/penguins_size.csv'
     
     try:
         logger.info(f"Starting model training test with data: {test_data_path}")
@@ -30,25 +35,27 @@ def test_model_training(model):
         pytest.fail(f"Model training failed: {str(e)}")
 
 def test_model_prediction(model):
-    """Тестирование предсказаний модели с логированием"""
-    test_sample = {
-        'island': 'Torgersen',
+    from api.schemas import PenguinFeatures 
+
+    """Тестирование предсказаний модели"""
+    test_sample = {'island': 'Torgersen',
         'culmen_length_mm': 39.1,
         'culmen_depth_mm': 18.7,
         'flipper_length_mm': 181.0,
         'body_mass_g': 3750.0,
         'sex': 'MALE'
-    }
+        }
     
     try:
         logger.info("Starting model prediction test")
         logger.debug(f"Test sample: {test_sample}")
-        
-        # Обучаем модель сначала
-        model.train('data/raw/penguins.csv')
-        
+
+        logger.debug("Transforming dict to pydantic")
+        validated = PenguinFeatures.model_validate(test_sample)
+
         logger.debug("Calling model.predict()")
-        prediction = model.predict(test_sample)
+
+        prediction = model.predict(validated)
         
         logger.info(f"Model prediction: {prediction}")
         assert prediction in ['Adelie', 'Gentoo', 'Chinstrap'], "Invalid prediction"

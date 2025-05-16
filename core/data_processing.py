@@ -38,10 +38,10 @@ class DataProcessor:
         
         self.preprocessor = ColumnTransformer(
             transformers=[
-                ('num', StandardScaler(), ['culmen_length_mm', 'culmen_depth_mm', 
-                 'flipper_length_mm', 'body_mass_g']),
-                ('cat', OneHotEncoder(), ['island', 'sex'])
-            ])
+                ('cat', OneHotEncoder(handle_unknown='ignore'), ['island', 'sex'])
+            ],
+            remainder='passthrough'  # Числовые признаки остаются без изменений
+        )
     
     
     def _validate_config(self, config: Dict[str, Any]) -> Dict[str, Any]:
@@ -86,3 +86,16 @@ class DataProcessor:
         except Exception as e:
             logging.error(f"Transform failed: {str(e)}")
             raise ValueError(f"Feature transformation error: {str(e)}")
+
+    def fit(self, df: pd.DataFrame):
+        """Обучение препроцессора на данных"""
+        self.preprocessor.fit(df)
+        # Получаем имена фичей после преобразования
+        self.feature_names = self.preprocessor.get_feature_names_out()
+        return self
+
+    def get_feature_names(self):
+        """Возвращает имена фичей после преобразования"""
+        if self.feature_names is None:
+            raise RuntimeError("Processor not fitted yet")
+        return self.feature_names

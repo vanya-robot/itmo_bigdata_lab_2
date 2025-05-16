@@ -5,6 +5,8 @@ from .data_processing import DataProcessor
 from .exceptions import ModelTrainingError, ModelSaveError
 from typing import Dict, Any
 from pathlib import Path
+from api.schemas import PenguinFeatures
+import pandas as pd
 
 class PenguinClassifier:
     def __init__(self, config: Dict[str, Any] = None, **kwargs):
@@ -36,10 +38,14 @@ class PenguinClassifier:
         except Exception as e:
             raise ModelTrainingError(f"Training failed: {str(e)}")
 
-    def predict(self, features):
+    def predict(self, features: PenguinFeatures):
         if not self.is_trained:
             raise ValueError("Model is not trained yet")
-        return self.model.predict(features)
+        
+        features_dict = features.dict()
+
+        processed = self.data_processor.transform_single(features_dict)
+        return self.model.predict(processed)
 
     def save(self, path):
         """Сохраняет модель, создавая директорию при необходимости"""
@@ -66,4 +72,5 @@ class PenguinClassifier:
         instance.accuracy = loaded['accuracy']
         instance.data_processor = loaded['data_processor']
         instance.is_trained = True
+        instance.config = loaded['config']
         return instance

@@ -1,12 +1,10 @@
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from core.model import PenguinClassifier
-import joblib
-from .schemas import PenguinFeatures
+from api.schemas import PenguinFeatures
 from pathlib import Path
 import logging
 import time
-import pandas as pd
 
 LOG_DIR = Path("logs/")
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -40,6 +38,7 @@ async def log_requests(request: Request, call_next):
 
 try:
     model = PenguinClassifier.load('models/penguin_model.pkl')
+    
     logger.info("Model loaded successfully")
 except Exception as e:
     logger.critical(f"Failed to load model: {str(e)}")
@@ -48,16 +47,13 @@ except Exception as e:
 @app.post("/predict")
 async def predict(features: PenguinFeatures):
     try:
-        logger.info(f"Prediction request: {features.dict()}")
+        logger.info(f"Prediction request: {features}")
 
-        df = pd.DataFrame([features.dict()])
-        processed = model.data_processor.preprocessor.transform(df)
-        logger.debug("Data processed successfully")
-
-        prediction = model.predict(processed)
+        prediction = model.predict(features)
         logger.info(f"Prediction result: {prediction[0]}")
 
         return {"species": prediction[0]}
+
     except Exception as e:
         logger.error(f"Prediction failed: {str(e)}", exc_info=True)
         raise HTTPException(status_code=400, detail=str(e))
