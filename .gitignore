@@ -7,10 +7,7 @@
 /data
 penguin_classifier.egg-info
 logs/
-models/
 testing.py
-**/*.pkl
 !models/.gitkeep
 !data/raw/.gitkeep
-models/penguin_model.pkl
 /.pytest_cache
