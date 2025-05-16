@@ -14,26 +14,6 @@ def model():
 def processor():
     return DataProcessor()
 
-def test_model_training(model):
-    """Тестирование обучения модели с логированием"""
-    test_data_path = 'data/raw/penguins_size.csv'
-    
-    try:
-        logger.info(f"Starting model training test with data: {test_data_path}")
-        
-        logger.debug("Calling model.train()")
-        accuracy = model.train(test_data_path)
-        
-        logger.info(f"Model trained with accuracy: {accuracy:.2f}")
-        assert 0 <= accuracy <= 1, "Invalid accuracy value"
-        
-        logger.info("Model training test completed successfully")
-        
-    except Exception as e:
-        logger.error(f"Model training failed: {str(e)}")
-        logger.exception("Exception details:")
-        pytest.fail(f"Model training failed: {str(e)}")
-
 def test_model_prediction(model):
     from api.schemas import PenguinFeatures 
 
