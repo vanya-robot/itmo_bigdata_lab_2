@@ -12,3 +12,5 @@ testing.py
 **/*.pkl
 !models/.gitkeep
 !data/raw/.gitkeep
+models/penguin_model.pkl
+/.pytest_cache
