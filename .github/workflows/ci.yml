@@ -21,6 +21,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -e ".[dev]"
+        python scripts/train.py
         
     - name: Run tests
       run: |
