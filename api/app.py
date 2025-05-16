@@ -57,3 +57,7 @@ async def predict(features: PenguinFeatures):
     except Exception as e:
         logger.error(f"Prediction failed: {str(e)}", exc_info=True)
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/health")
+def health_check():
+    return {"status": "OK"}
