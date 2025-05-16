@@ -7,7 +7,7 @@ LOG_DIR.mkdir(parents=True, exist_ok=True)
 setup(
     name="penguin_classifier",
     version="0.1",
-    packages=find_packages(exclude=["tests*"]),
+    packages=find_packages(),
     install_requires=[
         'scikit-learn>=1.0',
         'pandas>=1.3',
@@ -16,6 +16,7 @@ setup(
         'pydantic>=1.8',
         'joblib>=1.0',
         'python-dotenv>=0.19'
+        'httpx>=0.28.1'
     ],
     extras_require={
         'dev': [
