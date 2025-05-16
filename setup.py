@@ -15,7 +15,7 @@ setup(
         'uvicorn>=0.15',
         'pydantic>=1.8',
         'joblib>=1.0',
-        'python-dotenv>=0.19'
+        'python-dotenv>=0.19',
         'httpx>=0.28.1'
     ],
     extras_require={
