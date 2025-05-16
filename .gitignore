@@ -7,3 +7,5 @@
 /data
 penguin_classifier.egg-info
 logs/
+models/
+testing.py
