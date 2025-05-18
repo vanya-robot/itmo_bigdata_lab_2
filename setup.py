@@ -18,7 +18,8 @@ setup(
         'python-dotenv>=0.19',
         'sqlalchemy>=1.4',
         'psycopg2-binary>=2.9',
-        'alembic>=1.7'
+        'alembic>=1.7',
+        'pydantic-settings'
     ],
     extras_require={
         'dev': [

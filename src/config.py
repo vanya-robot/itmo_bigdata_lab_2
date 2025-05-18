@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 from pathlib import Path
 from typing import Dict, Any
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 def load_config(config_path: str = 'config.ini') -> ConfigParser:
     config = ConfigParser()
