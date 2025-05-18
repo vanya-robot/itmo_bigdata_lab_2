@@ -5,8 +5,7 @@ from .data_processing import DataProcessor
 from .exceptions import ModelTrainingError, ModelSaveError
 from typing import Dict, Any
 from pathlib import Path
-from api.schemas import PenguinFeatures
-import pandas as pd
+from .api.schemas import PenguinFeatures
 
 class PenguinClassifier:
     def __init__(self, config: Dict[str, Any] = None, **kwargs):

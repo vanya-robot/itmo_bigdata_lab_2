@@ -1,21 +1,21 @@
 import pytest
 import logging
-from core.model import PenguinClassifier
-from core.exceptions import ModelTrainingError
-from core.data_processing import DataProcessor
+from src.model import PenguinClassifier
+from src.exceptions import ModelTrainingError
+from src.data_processing import DataProcessor
 
 logger = logging.getLogger("model test logger")
 
 @pytest.fixture
 def model():
-    return PenguinClassifier.load('models/penguin_model.pkl')
+    return PenguinClassifier.load('experiments/penguin_model.pkl')
 
 @pytest.fixture
 def processor():
     return DataProcessor()
 
 def test_model_prediction(model):
-    from api.schemas import PenguinFeatures 
+    from src.api.schemas import PenguinFeatures 
 
     """Тестирование предсказаний модели"""
     test_sample = {'island': 'Torgersen',
