@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel
 from src.model import PenguinClassifier
-from .schemas import PenguinFeatures
+from src.api.schemas import PenguinFeatures
 from pathlib import Path
 import logging
 import time

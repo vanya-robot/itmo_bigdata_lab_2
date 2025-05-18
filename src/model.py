@@ -1,11 +1,11 @@
 import joblib
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
-from .data_processing import DataProcessor
-from .exceptions import ModelTrainingError, ModelSaveError
+from src.data_processing import DataProcessor
+from src.exceptions import ModelTrainingError, ModelSaveError
 from typing import Dict, Any
 from pathlib import Path
-from .api.schemas import PenguinFeatures
+from src.api.schemas import PenguinFeatures
 
 class PenguinClassifier:
     def __init__(self, config: Dict[str, Any] = None, **kwargs):
