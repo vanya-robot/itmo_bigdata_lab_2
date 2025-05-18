@@ -85,7 +85,7 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Build Docker image
-      run: docker-compose build
+      run: docker compose build
       
     - name: Test containers
       env:
@@ -94,7 +94,7 @@ jobs:
         POSTGRES_DB: ${{ env.POSTGRES_DB }}
         DATABASE_URL: ${{ env.DATABASE_URL }}
       run: |
-        docker-compose up -d
+        docker compose up -d
         sleep 360
         
         curl -sSf http://localhost:8000/health || exit 1
