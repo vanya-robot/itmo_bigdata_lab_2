@@ -19,8 +19,8 @@ jobs:
     
     - name: Deploy to Docker Hub
       run: |
-        chmod +x scripts/deploy.sh
-        ./scripts/deploy.sh
+        chmod +x src/scripts/deploy.sh
+        ./src/scripts/deploy.sh
         
     - name: Create deploy info
       run: |

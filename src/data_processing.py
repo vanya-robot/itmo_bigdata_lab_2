@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
+from src.exceptions import DataValidationError, FeatureProcessingError
 from configparser import ConfigParser
 from typing import Dict, Any
 from pathlib import Path
@@ -63,29 +64,45 @@ class DataProcessor:
         return validated
 
     def process(self, data_path):
-        df = pd.read_csv(data_path)
-        df = df.dropna()
-        
-        X = df.drop('species', axis=1)
-        y = df['species']
-        
-        X_processed = self.preprocessor.fit_transform(X)
-        return train_test_split(X_processed, y, 
-                              test_size=self.config['test_size'],
-                              random_state=self.config['random_state'])
-    
-    def transform_single(self, features: dict) -> np.array:
-        """Преобразует единичный образец для предсказания"""
         try:
-
-            df = pd.DataFrame([features])
+            df = pd.read_csv(data_path)
+            if df.empty:
+                raise DataValidationError("Empty dataset")
+                
+            df = df.dropna()
+            if df.empty:
+                raise DataValidationError("No valid data after NA removal")
+                
+            X = df.drop('species', axis=1)
+            y = df['species']
             
+            X_processed = self.preprocessor.fit_transform(X)
+            return train_test_split(X_processed, y, 
+                                  test_size=self.config['test_size'],
+                                  random_state=self.config['random_state'])
+        except pd.errors.EmptyDataError as e:
+            raise DataValidationError("CSV file is empty or corrupt")
+        
+        except KeyError as e:
+            raise DataValidationError(f"Missing required column: {str(e)}")
+        
+        except Exception as e:
+            raise FeatureProcessingError(f"Data processing failed: {str(e)}")
+
+    def transform_single(self, features: dict) -> np.array:
+        try:
+            df = pd.DataFrame([features])
             processed = self.preprocessor.transform(df)
             return processed
-            
+        
+        except ValueError as e:
+            raise FeatureProcessingError(f"Invalid feature values: {str(e)}")
+        
+        except AttributeError as e:
+            raise FeatureProcessingError("Preprocessor not fitted yet")
+        
         except Exception as e:
-            logging.error(f"Transform failed: {str(e)}")
-            raise ValueError(f"Feature transformation error: {str(e)}")
+            raise FeatureProcessingError(f"Feature transformation failed: {str(e)}")
 
     def fit(self, df: pd.DataFrame):
         """Обучение препроцессора на данных"""

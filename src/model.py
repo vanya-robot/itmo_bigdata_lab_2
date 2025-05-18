@@ -2,7 +2,7 @@ import joblib
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from src.data_processing import DataProcessor
-from src.exceptions import ModelTrainingError, ModelSaveError
+from src.exceptions import ModelTrainingError, ModelSaveError, DataValidationError, FeatureProcessingError
 from typing import Dict, Any
 from pathlib import Path
 from src.api.schemas import PenguinFeatures
@@ -34,6 +34,13 @@ class PenguinClassifier:
             self.is_trained = True
             
             return self.accuracy
+        
+        except DataValidationError as e:
+            raise ModelTrainingError(f"Invalid training data: {str(e)}")
+        
+        except FeatureProcessingError as e:
+            raise ModelTrainingError(f"Feature processing failed: {str(e)}")
+        
         except Exception as e:
             raise ModelTrainingError(f"Training failed: {str(e)}")
 
