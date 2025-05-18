@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel
-from core.model import PenguinClassifier
-from api.schemas import PenguinFeatures
+from src.model import PenguinClassifier
+from src.api.schemas import PenguinFeatures
 from pathlib import Path
 import logging
 import time
@@ -22,7 +21,7 @@ logger = logging.getLogger("api logger")
 
 app = FastAPI(title="Penguin Species Classifier API")
 
-# Middleware для логирования запросов
+# Логирование запросов
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     start_time = time.time()
@@ -37,7 +36,7 @@ async def log_requests(request: Request, call_next):
     return response
 
 try:
-    model = PenguinClassifier.load('models/penguin_model.pkl')
+    model = PenguinClassifier.load('./experiments/penguin_model.pkl')
     
     logger.info("Model loaded successfully")
 except Exception as e:

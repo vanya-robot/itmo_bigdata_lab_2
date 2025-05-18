@@ -2,9 +2,9 @@ import logging
 import zipfile
 import os
 from pathlib import Path
-from core.model import PenguinClassifier
-from core.config import load_config_to_dict
-from core.exceptions import ModelSaveError, ModelTrainingError
+from src.model import PenguinClassifier
+from src.config import load_config_to_dict
+from src.exceptions import ModelSaveError, ModelTrainingError
 from pathlib import Path
 
 LOG_DIR = Path("logs/")
@@ -50,12 +50,12 @@ def main():
         logger.info("Starting training process...")
         
         data_path = ensure_data_ready()
-        config = load_config_to_dict('configs/config.ini')
+        config = load_config_to_dict('config.ini')
 
         model = PenguinClassifier(config)
         accuracy = model.train(data_path)
         try:
-            model.save('models/penguin_model.pkl')
+            model.save('experiments/penguin_model.pkl')
             logger.info(f"Training completed successfully! Accuracy: {accuracy:.2f}")
         except ModelSaveError as e:
             logger.critical(f"Saving failed: {str(e)}")
