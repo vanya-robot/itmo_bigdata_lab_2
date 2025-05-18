@@ -1,9 +1,11 @@
 from fastapi import FastAPI, HTTPException, Request
 from src.model import PenguinClassifier
 from src.api.schemas import PenguinFeatures
+from src.exceptions import ModelLoadError, PredictionError
 from pathlib import Path
 import logging
 import time
+import joblib
 
 LOG_DIR = Path("logs/")
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -37,25 +39,35 @@ async def log_requests(request: Request, call_next):
 
 try:
     model = PenguinClassifier.load('./experiments/penguin_model.pkl')
-    
     logger.info("Model loaded successfully")
-except Exception as e:
+
+except (FileNotFoundError, joblib.UnpicklingError) as e:
     logger.critical(f"Failed to load model: {str(e)}")
-    raise RuntimeError("Cannot start API without model")
+    raise ModelLoadError(f"Cannot load model: {str(e)}")
+
+except Exception as e:  # Оставляем как последнюю линию защиты
+    logger.critical(f"Unexpected error loading model: {str(e)}")
+    raise RuntimeError("Cannot start API due to unexpected error")
 
 @app.post("/predict")
 async def predict(features: PenguinFeatures):
     try:
         logger.info(f"Prediction request: {features}")
-
         prediction = model.predict(features)
         logger.info(f"Prediction result: {prediction[0]}")
-
         return {"species": prediction[0]}
-
-    except Exception as e:
+    
+    except ValueError as e:  # Для ошибок валидации
+        logger.error(f"Invalid input: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=422, detail=str(e))
+    
+    except PredictionError as e:  # Специальное исключение для ошибок предсказания
         logger.error(f"Prediction failed: {str(e)}", exc_info=True)
         raise HTTPException(status_code=400, detail=str(e))
+    
+    except Exception as e:  # Для непредвиденных ошибок
+        logger.error(f"Unexpected prediction error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.get("/health")
 def health_check():
