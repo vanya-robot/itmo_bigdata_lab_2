@@ -13,7 +13,7 @@ setup(
         'pandas>=1.3',
         'fastapi>=0.68',
         'uvicorn>=0.15',
-        'pydantic>=1.8',
+        'pydantic',
         'joblib>=1.0',
         'python-dotenv>=0.19',
         'sqlalchemy>=1.4',
