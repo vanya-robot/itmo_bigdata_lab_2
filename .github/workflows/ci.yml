@@ -6,55 +6,94 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  POSTGRES_USER: test_user
+  POSTGRES_PASSWORD: test_pass
+  POSTGRES_DB: test_db
+  POSTGRES_PORT: 5432
+  DATABASE_URL: postgresql://test_user:test_pass@localhost:5432/test_db
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:13
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        volumes:
+          - postgres_data:/var/lib/postgresql/data
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.9'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
-        
-    - name: Run tests
-      run: |
-        pytest tests/ --junitxml=test-results.xml -v
-        
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results
-        path: test-results.xml
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install psycopg2-binary
+
+      - name: Initialize test database
+        run: |
+          python -c "from src.scripts.init_db import init_db; init_db()"
+
+      - name: Run tests
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: |
+          pytest tests/ --junitxml=test-results.xml -v
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results.xml
 
   build-and-test:
     needs: test
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Build Docker image
-      run: docker build -t penguin-classifier .
-      
-    - name: Test container
-      run: |
-        docker run -d -p 8000:8000 --name penguin-app penguin-classifier
+      - uses: actions/checkout@v4
 
-        for i in {1..12}; do
-          if docker logs penguin-app 2>&1 | grep -q "Application startup complete"; then
-            break
-          fi
-          sleep 10
-        done
+      - name: Create temp .env
+        run: |
+          echo "POSTGRES_USER=test_user" > .env
+          echo "POSTGRES_PASSWORD=test_pass" >> .env
+          echo "POSTGRES_DB=test_db" >> .env
+          echo "POSTGRES_PORT=5432" >> .env
+          echo "DATABASE_URL=postgresql://test_user:test_pass@db:5432/test_db" >> .env
 
-        curl -sSf http://localhost:8000/health || exit 1
+      - name: Build Docker image
+        run: docker compose build
 
-        curl -sSf -X POST http://localhost:8000/predict \
-          -H "Content-Type: application/json" \
-          -d '{"island":"Torgersen","culmen_length_mm":39.1,"culmen_depth_mm":18.7,"flipper_length_mm":181.0,"body_mass_g":3750.0,"sex":"MALE"}' \
-          | grep -q '"species":' || exit 1
+      - name: Test containers
+        run: |
+          docker compose up -d
+          sleep 30
+
+          # Проверяем эндпоинт здоровья:
+          curl -sSf http://localhost:8000/health || exit 1
+
+          # Проверяем /predict:
+          curl -sSf -X POST http://localhost:8000/predict \
+            -H "Content-Type: application/json" \
+            -d '{"island":"Torgersen","culmen_length_mm":39.1,"culmen_depth_mm":18.7,"flipper_length_mm":181.0,"body_mass_g":3750.0,"sex":"MALE"}' \
+            | grep -q '"species":' || exit 1
+
+          # Проверяем, что запись сохранилась в БД:
+          docker compose exec db psql -U test_user -d test_db -c "SELECT * FROM predictions;" || exit 1
