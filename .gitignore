@@ -11,4 +11,3 @@ testing.py
 !models/.gitkeep
 !data/raw/.gitkeep
 /.pytest_cache
-.env
