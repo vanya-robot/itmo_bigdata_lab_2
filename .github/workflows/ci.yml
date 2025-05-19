@@ -96,4 +96,4 @@ jobs:
             | grep -q '"species":' || exit 1
 
           # Проверяем, что запись сохранилась в БД:
-          docker-compose exec db psql -U test_user -d test_db -c "SELECT * FROM predictions;" || exit 1
+          docker compose exec db psql -U test_user -d test_db -c "SELECT * FROM predictions;" || exit 1
