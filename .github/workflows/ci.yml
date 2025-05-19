@@ -17,7 +17,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     services:
-      postgres:
+      db:
         image: postgres:13
         env:
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
@@ -67,7 +67,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     services:
-      postgres:
+      db:
         image: postgres:13
         env:
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
