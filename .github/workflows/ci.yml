@@ -84,7 +84,7 @@ jobs:
       - name: Test containers
         run: |
           docker compose up -d
-          sleep 30  # достаточно, чтобы БД и API поднялись
+          sleep 30
 
           # Проверяем эндпоинт здоровья:
           curl -sSf http://localhost:8000/health  exit 1
