@@ -10,8 +10,8 @@ env:
   POSTGRES_USER: test_user
   POSTGRES_PASSWORD: test_pass
   POSTGRES_DB: test_db
-  POSTGRES_PORT: 5433
-  DATABASE_URL: postgresql://test_user:test_pass@localhost:5433/test_db
+  POSTGRES_PORT: 5432
+  DATABASE_URL: postgresql://test_user:test_pass@localhost:5432/test_db
 
 jobs:
   test:
@@ -24,7 +24,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ env.POSTGRES_DB }}
         ports:
-          - "5433:5432"
+          - "5432:5432"
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -74,7 +74,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ env.POSTGRES_DB }}
         ports:
-          - "5433:5432"
+          - "5432:5432"
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
