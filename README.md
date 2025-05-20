@@ -18,3 +18,5 @@ curl -X POST "http://localhost:8000/predict" \
   "body_mass_g": 3750.0,
   "sex": "MALE"
 }'
+
+You should provide environment variables during Docker Container startup like this:
